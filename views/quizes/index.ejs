@@ -1,5 +1,17 @@
+<form action="" method="get" enctype="application/x-www-form-urlencoded" name="buscador" id="buscador">
+  <input type="text" name="search" id="search" value="<%= search %>" placeholder="Pregunta a buscar">
+  <input type="submit" id="buscar" value="Buscar">
+</form>
+<% if (quizes.length>0) { %>
 <table>
 <% var i; for (i=0; i < quizes.length; i++) { %>
 	<tr><td><a href="quizes/<%= quizes[i].id %>"><%= quizes[i].pregunta %></a></td></tr>
 <% } %>
 </table>
+<% } else { 
+	if (search) { %>
+	<p>No hay preguntas que correspondan con su criterio de búsqueda.</p>
+	<p><a href="quizes">Regrese al listado de todas las preguntas.</a></p>
+	<%  } else { %>
+	<p>No hay preguntas que mostrar.</p>
+<% } }%>
