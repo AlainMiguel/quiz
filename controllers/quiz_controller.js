@@ -48,3 +48,25 @@ exports.answer = function (req, res, next) {
 		}
 	});
 }
+
+// GET /quizes/new
+exports.new = function (req, res, next) {
+	models.Quiz.find(req.params.quizId).then(function(quiz) {
+		// Crea objeto Quiz
+		var quiz = models.Quiz.build({pregunta: "Pregunta", respuesta: "Respuesta"});
+
+		res.render('quizes/new', {quiz: quiz});
+	});
+}
+
+// POST /quizes/create
+exports.create = function (req, res, next) {
+	// Crea objeto Quiz
+	var quiz = models.Quiz.build( req.body.quiz );
+
+	// Guarda en la BD el nuevo quiz
+	quiz.save({fields: ["pregunta", "respuesta"]}).then(function(){
+		// Redireccion a lista de preguntas
+		res.redirect('/quizes');
+	});
+}
