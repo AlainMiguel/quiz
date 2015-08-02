@@ -55,7 +55,7 @@ exports.new = function (req, res, next) {
 		// Crea objeto Quiz
 		var quiz = models.Quiz.build({pregunta: "", respuesta: ""});
 
-		res.render('quizes/new', {quiz: quiz, errors: []});
+		res.render('quizes/new', {quiz: quiz, accion: 'Añadir', errors: []});
 	});
 }
 
@@ -71,6 +71,34 @@ exports.create = function (req, res, next) {
 				res.render('quizes/new', {quiz: quiz, errors: err.errors})
 			} else { // Guarda en la BD el nuevo quiz
 				quiz.save({fields: ["pregunta", "respuesta"]}).then(function(){
+					// Redireccion a lista de preguntas
+					res.redirect('/quizes');
+				});
+			}
+		}
+	);
+}
+
+// GET /quizes/quizes/:id/edit
+exports.edit = function (req, res, next) {
+	// Cargar instancia de quiz
+	var quiz = req.quiz;
+
+	res.render('quizes/edit', {quiz:quiz, accion: 'Actualizar', errors: []});
+}
+
+// PUT /quizes/:id
+exports.update = function (req, res, next) {
+	req.quiz.pregunta = req.body.quiz.pregunta;
+	req.quiz.respuesta = req.body.quiz.respuesta;
+
+	// Valida y actualiza en la BD el quiz
+	req.quiz.validate().then( 
+		function(err) {
+			if (err) {
+				res.render('quizes/edit', {quiz: req.quiz, accion: 'Actualizar', errors: err.errors})
+			} else { // Guarda en la BD el quiz
+				req.quiz.save({fields: ["pregunta", "respuesta"]}).then(function(){
 					// Redireccion a lista de preguntas
 					res.redirect('/quizes');
 				});
