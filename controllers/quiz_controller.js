@@ -22,11 +22,11 @@ exports.index = function (req, res, next) {
 
 	if (search === '') { // Listar todas las preguntas
 		models.Quiz.findAll().then(function(quizes) {
-			res.render('quizes/index', {quizes: quizes, search: search});
+			res.render('quizes/index', {quizes: quizes, search: search, errors: []});
 		}).catch(function(error) { next(error); });
 	} else { // Buscar preguntas con texto
 		models.Quiz.findAll( {where:["pregunta LIKE ?", '%' + search.replace(/ /g, '%') + '%'], order:"pregunta"} ).then(function(quizes) {
-			res.render('quizes/index', {quizes: quizes, search: search});
+			res.render('quizes/index', {quizes: quizes, search: search, errors: []});
 		}).catch(function(error) { next(error); });
 	}
 }
@@ -34,7 +34,7 @@ exports.index = function (req, res, next) {
 // GET /quizes/quizes/:id
 exports.show = function (req, res, next) {
 	models.Quiz.find(req.params.quizId).then(function(quiz) {
-		res.render('quizes/show', {quiz:req.quiz});
+		res.render('quizes/show', {quiz:req.quiz, errors: []});
 	});
 }
 
@@ -42,9 +42,9 @@ exports.show = function (req, res, next) {
 exports.answer = function (req, res, next) {
 	models.Quiz.find(req.params.quizId).then(function(quiz) {
 		if (req.query.respuesta === req.quiz.respuesta) {
-			res.render('quizes/answer', {quiz: quiz, respuesta: 'Correcto'});
+			res.render('quizes/answer', {quiz: quiz, respuesta: 'Correcto', errors: []});
 		} else {
-			res.render('quizes/answer', {quiz: req.quiz, respuesta: 'Incorrecto'});
+			res.render('quizes/answer', {quiz: req.quiz, respuesta: 'Incorrecto', errors: []});
 		}
 	});
 }
@@ -53,9 +53,9 @@ exports.answer = function (req, res, next) {
 exports.new = function (req, res, next) {
 	models.Quiz.find(req.params.quizId).then(function(quiz) {
 		// Crea objeto Quiz
-		var quiz = models.Quiz.build({pregunta: "Pregunta", respuesta: "Respuesta"});
+		var quiz = models.Quiz.build({pregunta: "", respuesta: ""});
 
-		res.render('quizes/new', {quiz: quiz});
+		res.render('quizes/new', {quiz: quiz, errors: []});
 	});
 }
 
@@ -65,8 +65,16 @@ exports.create = function (req, res, next) {
 	var quiz = models.Quiz.build( req.body.quiz );
 
 	// Guarda en la BD el nuevo quiz
-	quiz.save({fields: ["pregunta", "respuesta"]}).then(function(){
-		// Redireccion a lista de preguntas
-		res.redirect('/quizes');
-	});
+	quiz.validate().then( 
+		function(err) {
+			if (err) {
+				res.render('quizes/new', {quiz: quiz, errors: err.errors})
+			} else { // Guarda en la BD el nuevo quiz
+				quiz.save({fields: ["pregunta", "respuesta"]}).then(function(){
+					// Redireccion a lista de preguntas
+					res.redirect('/quizes');
+				});
+			}
+		}
+	);
 }
