@@ -106,3 +106,13 @@ exports.update = function (req, res, next) {
 		}
 	);
 }
+
+// DELETE /quizes/:id
+exports.destroy = function (req, res, next) {
+	req.quiz.destroy().then( 
+		function() {
+			// Redireccion a lista de preguntas
+			res.redirect('/quizes');
+		}
+	).catch(function(error){ next(error) });
+}
