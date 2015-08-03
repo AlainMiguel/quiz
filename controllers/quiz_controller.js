@@ -8,7 +8,10 @@ var temas = {otro: 'Otro', humanidades: 'Humanidades', ocio: 'Ocio', ciencia: 'C
 
 // Autoload
 exports.load = function(req, res, next, quizId) {
-	models.Quiz.find(quizId).then(
+	models.Quiz.find({
+		where: { id: Number(quizId) },
+		include: [{ model: models.Comment }]
+	}).then(
 		function(quiz) {
 			if (quiz) {
 				req.quiz = quiz;
@@ -39,7 +42,7 @@ exports.index = function (req, res, next) {
 // GET /quizes/quizes/:id
 exports.show = function (req, res, next) {
 	models.Quiz.find(req.params.quizId).then(function(quiz) {
-		res.render('quizes/show', {quiz:req.quiz, temas: temas, errors: []});
+		res.render('quizes/show', {quiz: req.quiz, temas: temas, errors: []});
 	});
 }
 

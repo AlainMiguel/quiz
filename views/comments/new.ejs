@@ -1,0 +1,6 @@
+<p>Añadir comentario:</p>
+<form method="post" action="/quizes/<%= quizid %>/comments">
+	<p><input type="text" id="comment" name="comment[texto]" placeholder="Escriba una comentario" value=""/></p>
+	<a href="/quizes"><button type="button">Cancelar</button></a>
+	<input type="submit" value="Añadir comentario">
+</form>
