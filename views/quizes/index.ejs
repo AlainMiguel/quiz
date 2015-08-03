@@ -4,9 +4,15 @@
 </form>
 <% if (quizes.length>0) { %>
 <table>
+	<tr>
+		<td><strong>Preguntas</strong></td>
+		<td><strong>Tema<strong></td>
+		<td colspan="2"><strong>Acciones</strong></td>
+	</tr>
 <% var i; for (i=0; i < quizes.length; i++) { %>
 	<tr>
 		<td><a href="quizes/<%= quizes[i].id %>"><%= quizes[i].pregunta %></a></td>
+		<td><%= temas[quizes[i].tema] %></td>
 		<td><a href="quizes/<%= quizes[i].id %>/edit"><button>Editar</button></a></td>
 		<td>
 			<form method="post" action="/quizes/<%= quizes[i].id %>?_method=delete">

@@ -1,6 +1,11 @@
 // Importar modelo BD
 var models = require('../models/models.js');
 
+// Temas de las preguntas
+// Mejor pudiera estar en la BD, pero las relaciones entre tablas es asunto del tema 9
+// Ya llegaré allá
+var temas = {otro: 'Otro', humanidades: 'Humanidades', ocio: 'Ocio', ciencia: 'Ciencia', tecnologia: 'Tecnología'};
+
 // Autoload
 exports.load = function(req, res, next, quizId) {
 	models.Quiz.find(quizId).then(
@@ -19,14 +24,14 @@ exports.load = function(req, res, next, quizId) {
 exports.index = function (req, res, next) {
 	var search = req.query.search || '';
 
-
 	if (search === '') { // Listar todas las preguntas
 		models.Quiz.findAll().then(function(quizes) {
-			res.render('quizes/index', {quizes: quizes, search: search, errors: []});
+			res.render('quizes/index', {quizes: quizes, search: search, temas: temas, errors: []});
 		}).catch(function(error) { next(error); });
 	} else { // Buscar preguntas con texto
-		models.Quiz.findAll( {where:["pregunta LIKE ?", '%' + search.replace(/ /g, '%') + '%'], order:"pregunta"} ).then(function(quizes) {
-			res.render('quizes/index', {quizes: quizes, search: search, errors: []});
+		models.Quiz.findAll( {where:["pregunta LIKE ?", '%' + search.replace(/ /g, '%') + '%'], order:"pregunta"} )
+		.then(function(quizes) {
+			res.render('quizes/index', {quizes: quizes, search: search, temas: temas, errors: []});
 		}).catch(function(error) { next(error); });
 	}
 }
@@ -34,7 +39,7 @@ exports.index = function (req, res, next) {
 // GET /quizes/quizes/:id
 exports.show = function (req, res, next) {
 	models.Quiz.find(req.params.quizId).then(function(quiz) {
-		res.render('quizes/show', {quiz:req.quiz, errors: []});
+		res.render('quizes/show', {quiz:req.quiz, temas: temas, errors: []});
 	});
 }
 
@@ -53,7 +58,7 @@ exports.answer = function (req, res, next) {
 exports.new = function (req, res, next) {
 	models.Quiz.find(req.params.quizId).then(function(quiz) {
 		// Crea objeto Quiz
-		var quiz = models.Quiz.build({pregunta: "", respuesta: ""});
+		var quiz = models.Quiz.build({pregunta: "", respuesta: "", tema: "otro"});
 
 		res.render('quizes/new', {quiz: quiz, accion: 'Añadir', errors: []});
 	});
@@ -68,9 +73,9 @@ exports.create = function (req, res, next) {
 	quiz.validate().then( 
 		function(err) {
 			if (err) {
-				res.render('quizes/new', {quiz: quiz, errors: err.errors})
+				res.render('quizes/new', {quiz: quiz, accion: "Añadir", errors: err.errors})
 			} else { // Guarda en la BD el nuevo quiz
-				quiz.save({fields: ["pregunta", "respuesta"]}).then(function(){
+				quiz.save({fields: ["pregunta", "respuesta", "tema"]}).then(function(){
 					// Redireccion a lista de preguntas
 					res.redirect('/quizes');
 				});
@@ -91,6 +96,7 @@ exports.edit = function (req, res, next) {
 exports.update = function (req, res, next) {
 	req.quiz.pregunta = req.body.quiz.pregunta;
 	req.quiz.respuesta = req.body.quiz.respuesta;
+	req.quiz.tema = req.body.quiz.tema;
 
 	// Valida y actualiza en la BD el quiz
 	req.quiz.validate().then( 
@@ -98,7 +104,7 @@ exports.update = function (req, res, next) {
 			if (err) {
 				res.render('quizes/edit', {quiz: req.quiz, accion: 'Actualizar', errors: err.errors})
 			} else { // Guarda en la BD el quiz
-				req.quiz.save({fields: ["pregunta", "respuesta"]}).then(function(){
+				req.quiz.save({fields: ["pregunta", "respuesta", "tema"]}).then(function(){
 					// Redireccion a lista de preguntas
 					res.redirect('/quizes');
 				});
