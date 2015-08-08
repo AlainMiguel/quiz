@@ -26,6 +26,21 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(partials());
 
+// Guardar hora de última petición
+app.use(function(req, res, next) {
+    now = Math.round((new Date()).getTime() / 1000);
+    lastRequest = req.session.lastRequest || 0;
+
+    // Borra sesión si no hay actividad por más de 120 segundos (2 minutos)
+    if ( (now - lastRequest) > 120 ) {
+        delete req.session.user;
+    }
+    // Actualizar último acceso
+    req.session.lastRequest = now;
+    next();
+});
+
+
 // Helpers dinámicos
 app.use(function(req, res, next) {
     // Guardar path en session.redir para redireccionar después del login

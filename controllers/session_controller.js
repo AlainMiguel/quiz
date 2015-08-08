@@ -32,7 +32,8 @@ exports.create = function (req, res) {
 		req.session.user = {id: user.id, username: user.username};
 
 		// Redirección a path anterior a login
-		res.redirect(req.session.redir.toString());
+		var redir = (req.session.redir) ? req.session.redir.toString() : '/';
+		res.redirect(redir);
 		}
 	);
 }
